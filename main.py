@@ -88,7 +88,11 @@ def refrescar_video() -> None:
             try:
                 x1, y1, x2, y2, clase, confidencia =  obteniendo_datos_del_objeto(frame)
             except TypeError:
-                x1, y1, x2, y2, clase, confidencia = None, None, None, None, None, None
+                x1, y1, x2, y2, clase, confidencia = None, None, None, None, None, 0
+
+            # Dibujando la caja del objeto detectado, si la confidencia es mayor a 50%
+            if confidencia > 50:
+                dibujar_caja_del_objeto(x1, y1, x2, y2, clase, confidencia, frame)
 
             # Redimensionar el frame
             frame = imutils.resize(frame, width=914)
@@ -135,6 +139,42 @@ def obteniendo_datos_del_objeto(frame) -> tuple:
             confidencia: int = math.ceil(caja.conf[0] * 100)
             
             return x1, y1, x2, y2, clase, confidencia
+        
+def dibujar_caja_del_objeto(x1, y1, x2, y2, clase, confidencia, frame) -> None:
+    # Clasificando el objeto
+    match clase:
+        case "Llavero":
+            # Dibujando la caja del objeto
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (237, 64, 61), 2)
+            # Dibujando el nombre de la clase y la confidencia
+            cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+            # Dibujando el llavero
+            dibujar_producto()
+        case "Chompa":
+            # Dibujando la caja del objeto
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (253, 154, 143), 2)
+            # Dibujando el nombre de la clase y la confidencia
+            cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+            # Dibujando la chompa
+            dibujar_producto()
+        case "Guantes":
+            # Dibujando la caja del objeto
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (252, 113, 34), 2)
+            # Dibujando el nombre de la clase y la confidencia
+            cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+            # Dibujando los guantes
+            dibujar_producto()
+        case "Gorro":
+            # Dibujando la caja del objeto
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (242, 176, 34), 2)
+            # Dibujando el nombre de la clase y la confidencia
+            cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+            # Dibujando el gorro
+            dibujar_producto()
+
+
+def dibujar_producto() -> None:
+    pass
     
 
 if __name__ == "__main__":
