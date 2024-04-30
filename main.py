@@ -10,7 +10,7 @@ import math
 
 def run() -> None:
     # Declarando variables globales
-    global cap, lblVideo, model, nombres_clases, img_background, img_llavero, img_chompa, img_guantes, img_gorro
+    global cap, seccion_video, model, nombres_clases, img_background, img_llavero, img_chompa, img_guantes, img_gorro
     global img_llavero_inf, img_chompa_inf, img_guantes_inf, img_gorro_inf, pantalla
     
     # Ejecutamos Ventana principal
@@ -34,6 +34,9 @@ def run() -> None:
     img_guantes_inf = cv2.imread("./img/interface/guantes_inf.png")
     img_gorro_inf = cv2.imread("./img/interface/gorro_inf.png")
 
+    # Iniciando la captura de video
+    iniciar_video_camara()
+
     # Loop de la ventana
     pantalla.mainloop()
 
@@ -49,6 +52,25 @@ def ventana_principal() -> None:
     img_background = ImageTk.PhotoImage(Image.open("./img/interface/background.png"))
     background = Label(image=img_background, text="INKAROCA ML")
     background.place(x=0, y=0, relwidth=1, relheight=1)
+
+def iniciar_video_camara() -> None:
+    global cap, seccion_video, pantalla
+
+    # Inicializando la captura de video
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    # Resolución de la cámara
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 914)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 665)
+
+    # Sección de videocamara en la ventana principal (521, 314)
+    seccion_video = Label(pantalla)
+    seccion_video.place(x=521, y=314)
+
+    # Actualizando la sección de video
+    actualizar_video()
+
+def actualizar_video() -> None:
+    pass
 
 
 if __name__ == "__main__":
