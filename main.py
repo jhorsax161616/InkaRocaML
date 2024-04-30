@@ -12,6 +12,7 @@ def run() -> None:
     # Declarando variables globales
     global cap, seccion_video, model, nombres_clases, img_background, img_llavero, img_chompa, img_guantes, img_gorro
     global img_llavero_inf, img_chompa_inf, img_guantes_inf, img_gorro_inf, pantalla
+    global seccion_img_producto, seccion_img_producto_inf
     
     # Ejecutamos Ventana principal
     ventana_principal()
@@ -36,6 +37,14 @@ def run() -> None:
 
     # Iniciando la captura de video
     iniciar_video_camara()
+
+    # Sección de imagen del producto en la ventana principal (85, 312)
+    seccion_img_producto = Label(pantalla)
+    seccion_img_producto.place(x=85, y=312)
+
+    # Sección de imagen del producto en la ventana principal (1501, 312)
+    seccion_img_producto_inf = Label(pantalla)
+    seccion_img_producto_inf.place(x=1501, y=312)
 
     # Refrescar el video cada 10ms
     refrescar_video()
@@ -76,6 +85,8 @@ def refrescar_video() -> None:
     global cap, seccion_video, model, nombres_clases, img_background, img_llavero, img_chompa, img_guantes, img_gorro
     global img_llavero_inf, img_chompa_inf, img_guantes_inf, img_gorro_inf, pantalla
 
+    detect_guia = False
+
     # Leyendo el frame de la cámara si es valido
     if cap:
         ret, frame = cap.read()
@@ -87,12 +98,17 @@ def refrescar_video() -> None:
             # Obteniendo datos del objeto detectado
             try:
                 x1, y1, x2, y2, clase, confidencia =  obteniendo_datos_del_objeto(frame)
+                detect_guia = True
             except TypeError:
                 x1, y1, x2, y2, clase, confidencia = None, None, None, None, None, 0
 
             # Dibujando la caja del objeto detectado, si la confidencia es mayor a 50%
             if confidencia > 50:
                 dibujar_caja_del_objeto(x1, y1, x2, y2, clase, confidencia, frame)
+            
+            # Si no se detecta ningun objeto, quitamos la imagen del producto
+            if not detect_guia:
+                limpiar_producto()
 
             # Redimensionar el frame
             frame = imutils.resize(frame, width=914)
@@ -149,33 +165,56 @@ def dibujar_caja_del_objeto(x1, y1, x2, y2, clase, confidencia, frame) -> None:
             # Dibujando el nombre de la clase y la confidencia
             cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
             # Dibujando el llavero
-            dibujar_producto()
+            dibujar_producto(img_llavero, img_llavero_inf)
         case "Chompa":
             # Dibujando la caja del objeto
             cv2.rectangle(frame, (x1, y1), (x2, y2), (253, 154, 143), 2)
             # Dibujando el nombre de la clase y la confidencia
             cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
             # Dibujando la chompa
-            dibujar_producto()
+            dibujar_producto(img_chompa, img_chompa_inf)
         case "Guantes":
             # Dibujando la caja del objeto
             cv2.rectangle(frame, (x1, y1), (x2, y2), (252, 113, 34), 2)
             # Dibujando el nombre de la clase y la confidencia
             cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
             # Dibujando los guantes
-            dibujar_producto()
+            dibujar_producto(img_guantes, img_guantes_inf)
         case "Gorro":
             # Dibujando la caja del objeto
             cv2.rectangle(frame, (x1, y1), (x2, y2), (242, 176, 34), 2)
             # Dibujando el nombre de la clase y la confidencia
             cv2.putText(frame, f"{clase} {confidencia}%", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
             # Dibujando el gorro
-            dibujar_producto()
+            dibujar_producto(img_gorro, img_gorro_inf)
 
 
-def dibujar_producto() -> None:
-    pass
-    
+def dibujar_producto(img_producto, img_producto_inf) -> None:
+    img = img_producto
+    inf = img_producto_inf
+
+    # Colocando la imagen del producto en la sección de imagen
+    img = np.array(img, dtype=np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = Image.fromarray(img)
+
+    img_ = ImageTk.PhotoImage(image=img)
+    seccion_img_producto.configure(image=img_)
+    seccion_img_producto.image = img_
+
+    # Colocando la imagen del producto en la sección de información
+    inf = np.array(inf, dtype=np.uint8)
+    inf = cv2.cvtColor(inf, cv2.COLOR_RGB2BGR)
+    inf = Image.fromarray(inf)
+
+    inf_ = ImageTk.PhotoImage(image=inf)
+    seccion_img_producto_inf.configure(image=inf_)
+    seccion_img_producto_inf.image = inf_
+
+def limpiar_producto() -> None:
+    # Limpiando la imagen del producto
+    seccion_img_producto.config(image="")
+    seccion_img_producto_inf.config(image="")
 
 if __name__ == "__main__":
     run()
