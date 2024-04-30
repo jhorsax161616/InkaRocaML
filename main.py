@@ -17,7 +17,7 @@ def run() -> None:
     ventana_principal()
     
     # Cargando el modelo YOLO
-    #model = YOLO("./models/best110.pt")
+    model = YOLO("./models/best110.pt")
 
     # Clases: 0 -> llavero | 1 -> Chompa | 2 -> Guantes | 3 -> Gorro
     nombres_clases = ["Llavero", "Chompa", "Guantes", "Gorro"]
@@ -37,8 +37,8 @@ def run() -> None:
     # Iniciando la captura de video
     iniciar_video_camara()
 
-    # Actualizando la sección de video
-    actualizar_video()
+    # Refrescar el video cada 10ms
+    refrescar_video()
 
     # Loop de la ventana
     pantalla.mainloop()
@@ -72,19 +72,26 @@ def iniciar_video_camara() -> None:
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 665)
 
 
-def actualizar_video() -> None:
+def refrescar_video() -> None:
     global cap, seccion_video, model, nombres_clases, img_background, img_llavero, img_chompa, img_guantes, img_gorro
     global img_llavero_inf, img_chompa_inf, img_guantes_inf, img_gorro_inf, pantalla
 
     # Leyendo el frame de la cámara si es valido
     if cap:
         ret, frame = cap.read()
+        # Procesando el frame
+        frame = cv2.flip(frame, 1) # Efecto espejo
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         if ret:
-            # Procesando el frame
-            frame = cv2.flip(frame, 1) # Efecto espejo
+            # Obteniendo datos del objeto detectado
+            try:
+                x1, y1, x2, y2, clase, confidencia =  obteniendo_datos_del_objeto(frame)
+            except TypeError:
+                x1, y1, x2, y2, clase, confidencia = None, None, None, None, None, None
+
+            # Redimensionar el frame
             frame = imutils.resize(frame, width=914)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # Convertir el video
             im = Image.fromarray(frame)
@@ -93,10 +100,42 @@ def actualizar_video() -> None:
             # Mostrando el video en la ventana
             seccion_video.configure(image=img)
             seccion_video.image = img
-            seccion_video.after(10, actualizar_video) # Actualizar cada 10ms
+            seccion_video.after(10, refrescar_video) # Actualizar cada 10ms
+
         else:
             cap.release() # Liberar la cámara
 
+
+def obteniendo_datos_del_objeto(frame) -> tuple:
+    global cap, model, nombres_clases, img_llavero, img_chompa, img_guantes, img_gorro
+    global img_llavero_inf, img_chompa_inf, img_guantes_inf, img_gorro_inf
+
+    # Obteniendo los datos del objeto con el modelo YOLO
+    results = model(frame, stream=True, verbose=False)
+
+    # Recorriendo los resultados
+    for res in results:
+        # Extrayendo las cajas
+        cajas = res.boxes
+        # Recorriendo las cajas
+        for caja in cajas:
+            # Obteniendo las coordenadas de la caja en enteros
+            x1, y1, x2, y2 = [int(val) for val in caja.xyxy[0]]
+
+            # Corrigiendo error para objetos al limite de la captura
+            if x1 < 0: x1 = 0
+            if y1 < 0: y1 = 0
+            if x2 > 914: x2 = 914
+            if y2 > 665: y2 = 665
+
+            # Obteniendo el nombre de la clase por el indice
+            clase: str = nombres_clases[int(caja.cls[0])]
+
+            # Obteniendo la confidencia en porcentaje
+            confidencia: int = math.ceil(caja.conf[0] * 100)
+            
+            return x1, y1, x2, y2, clase, confidencia
+    
 
 if __name__ == "__main__":
     run()
