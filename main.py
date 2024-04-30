@@ -15,6 +15,24 @@ def run() -> None:
     
     # Ejecutamos Ventana principal
     ventana_principal()
+    
+    # Cargando el modelo YOLO
+    model = YOLO("/models/best110.pt")
+
+    # Clases: 0 -> llavero | 1 -> Chompa | 2 -> Guantes | 3 -> Gorro
+    nombres_clases = ["Llavero", "Chompa", "Guantes", "Gorro"]
+
+    # Cargando imagenes de productos con OpenCV
+    img_llavero = cv2.imread("./img/interface/llavero.png")
+    img_chompa = cv2.imread("./img/interface/chompa.png")
+    img_guantes = cv2.imread("./img/interface/guantes.png")
+    img_gorro = cv2.imread("./img/interface/gorro.png")
+
+    # Cargando imagenes de información de productos con OpenCV
+    img_llavero_inf = cv2.imread("./img/interface/llavero_inf.png")
+    img_chompa_inf = cv2.imread("./img/interface/chompa_inf.png")
+    img_guantes_inf = cv2.imread("./img/interface/guantes_inf.png")
+    img_gorro_inf = cv2.imread("./img/interface/gorro_inf.png")
 
     # Loop de la ventana
     pantalla.mainloop()
