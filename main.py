@@ -48,15 +48,15 @@ def run() -> None:
 
     # Sección de imagen del producto en la ventana principal (63, 234)
     seccion_img_producto = Label(pantalla)
-    seccion_img_producto.place(x=63, y=234)
+    seccion_img_producto.place(x=63, y=140)
 
     # Sección de imagen de información del producto en la ventana principal (1125, 234)
     seccion_img_producto_inf = Label(pantalla)
-    seccion_img_producto_inf.place(x=1125, y=234)
+    seccion_img_producto_inf.place(x=1120, y=160)
 
     # Sección de imagen del producto más vendido en la ventana principal (63, 515)
     seccion_img_producto_mas_vendido = Label(pantalla)
-    seccion_img_producto_mas_vendido.place(x=63, y=515)
+    seccion_img_producto_mas_vendido.place(x=63, y=490)
 
     # Producto más vendido INICIAL
     producto_mas_vendio: str = max(ventas, key=ventas.get)
@@ -97,13 +97,13 @@ def ventana_principal() -> None:
     # Boton de compra
     img_btn_comprar = ImageTk.PhotoImage(Image.open("./img/interface/btn_comprar.png"))
     btn_comprar = Button(image=img_btn_comprar, command=lambda: compra_producto(clase))
-    btn_comprar.place(x=1120, y=640)
+    btn_comprar.place(x=1120, y=605)
 
 def iniciar_video_camara() -> None:
     global cap, seccion_video, pantalla
     # Sección de videocamara en la ventana principal (521, 314)
     seccion_video = Label(pantalla)
-    seccion_video.place(x=390, y=235)
+    seccion_video.place(x=390, y=200)
 
     # Inicializando la captura de video
     cap = cv2.VideoCapture(1)
